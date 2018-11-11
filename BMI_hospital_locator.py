@@ -31,7 +31,7 @@ def webook():
 			for messaging_event in entry["messaging"]:
 				print(messaging_event)
 				if messaging_event.get("postback"):
-					print(1)
+					print("Post back event activated")
 					
 		# user clicked/tapped "postback" button in earlier message
 		 
@@ -51,20 +51,34 @@ def webook():
 							file.write(json.dumps(db))
 
 						send_message(sender_id, "Type your address")
+					if (message_text=="bmi"):
+
+						'''
+						update the data structure; write to a db (address=0, jpg=1)
+						'''
+						db={'address':0,'jpg':1}
+						with open('db.txt','w') as file:
+							file.write(json.dumps(db))
+
+						send_message(sender_id, "Please upload your selfie")
+
 				else:
 					# print('this is where you write the condition')
 					# print(messaging_event)
 					print(request.method)
 					if messaging_event.get('message'):
 						recipient_id=messaging_event['sender']['id']
+						
+						db=eval(open('db.txt','r').read())
+
 						if messaging_event['message'].get('text'):
 							text_message_callback=messaging_event['message'].get('text')
 							# if text_message_callback != 'Type your address' and not re.search('BMI',text_message_callback):
 							'''
 							read content of db here 
 							'''
-							db=eval(open('db.txt','r').read())
-
+							#db=eval(open('db.txt','r').read())
+							### echo is when the flask app sends a message
 							if not 'is_echo' in messaging_event.get('message').keys() and db.get('address'):
 								'''
 								if not echo and latest db record =[address=1 , jpg=0] ; only then write this
@@ -84,8 +98,8 @@ def webook():
 
 						# else:
 							# send_message(recipient_id,'howdy mate!')
-						
-						if messaging_event['message'].get('attachments'):
+		
+						if messaging_event['message'].get('attachments') and db.get('bmi'):
 							print('bmi')
 							'''
 							if latest db record=[address=0, jpg=1]
@@ -96,6 +110,14 @@ def webook():
 							response=give_ans(file_download_name)
 							# print(response)
 							send_message(recipient_id, response)
+							'''
+								Reset the records of the database [address=0,jpg=0] and write it back ; conversation completed
+
+							'''
+							db={'address':0,'jpg':0}
+								with open('db.txt','w') as file:
+									file.write(json.dumps(db))
+
 
 	return "Message Processed"
 
