@@ -1,5 +1,5 @@
 from flask import Flask, request
-import random,requests,wget,json
+import random,requests,wget,json,os
 from pymessenger.bot import Bot
 import urllib.request
 
@@ -12,6 +12,8 @@ c_ACCESS_TOKEN='EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTV
 VERIFY_TOKEN = 'VERIFY_TOKEN'
 bot = Bot(c_ACCESS_TOKEN)
 
+pic_folder_path=os.getcwd()+'/pics'
+
 db={'address':0,'jpg':0}
 with open('db.txt','w') as file:
 	file.write(json.dumps(db))
@@ -22,101 +24,111 @@ with open('db.txt','w') as file:
 def webook():
  
 # endpoint for processing incoming messaging events
+	if request.method == 'GET':
+
+		token_sent = request.args.get("hub.verify_token")
+		return verify_fb_token(token_sent)
  
-	data = request.get_json()
+	else:
+
+		data = request.get_json()
 	 
-	if data["object"] == "page":
+		if data["object"] == "page":
 	 
-		for entry in data["entry"]:
-			for messaging_event in entry["messaging"]:
-				print(messaging_event)
-				if messaging_event.get("postback"):
-					print("Post back event activated")
-					
-		# user clicked/tapped "postback" button in earlier message
-		 
-					message_text = messaging_event["postback"]["payload"]
-					# the button's payload
-					 
-					# log("Inside postback")
-					print(message_text)
-					sender_id = messaging_event["sender"]["id"]
-					 
-					if (message_text == "Address"):
-						'''
-						update the data structure ; write to a db ( address =1, jpg=0)
-						'''
-						db={'address':1,'jpg':0}
-						with open('db.txt','w') as file:
-							file.write(json.dumps(db))
-
-						send_message(sender_id, "Type your address")
-					if (message_text=="bmi"):
-
-						'''
-						update the data structure; write to a db (address=0, jpg=1)
-						'''
-						db={'address':0,'jpg':1}
-						with open('db.txt','w') as file:
-							file.write(json.dumps(db))
-
-						send_message(sender_id, "Please upload your selfie")
-
-				else:
-					# print('this is where you write the condition')
-					# print(messaging_event)
-					print(request.method)
-					if messaging_event.get('message'):
-						recipient_id=messaging_event['sender']['id']
+			for entry in data["entry"]:
+				for messaging_event in entry["messaging"]:
+					print(messaging_event)
+					if messaging_event.get("postback"):
+						print("Post back event activated")
 						
-						db=eval(open('db.txt','r').read())
+			# user clicked/tapped "postback" button in earlier message
+			 
+						message_text = messaging_event["postback"]["payload"]
+						# the button's payload
+						 
+						# log("Inside postback")
+						print(message_text)
+						sender_id = messaging_event["sender"]["id"]
+						 
+						if (message_text == "Address"):
+							'''
+							update the data structure ; write to a db ( address =1, jpg=0)
+							'''
+							db={'address':1,'jpg':0}
+							with open('db.txt','w') as file:
+								file.write(json.dumps(db))
 
-						if messaging_event['message'].get('text'):
-							text_message_callback=messaging_event['message'].get('text')
-							# if text_message_callback != 'Type your address' and not re.search('BMI',text_message_callback):
+							send_message(sender_id, "Type your address")
+						if (message_text=="bmi"):
+
 							'''
-							read content of db here 
+							update the data structure; write to a db (address=0, jpg=1)
 							'''
-							#db=eval(open('db.txt','r').read())
-							### echo is when the flask app sends a message
-							if not 'is_echo' in messaging_event.get('message').keys() and db.get('address'):
+							db={'address':0,'jpg':1}
+							with open('db.txt','w') as file:
+								file.write(json.dumps(db))
+
+							send_message(sender_id, "Please upload your selfie")
+
+					else:
+						# print('this is where you write the condition')
+						# print(messaging_event)
+						print(request.method)
+						if messaging_event.get('message'):
+							recipient_id=messaging_event['sender']['id']
+							
+							db=eval(open('db.txt','r').read())
+							print(db.get('jpg'))	
+
+							if messaging_event['message'].get('text'):
+								text_message_callback=messaging_event['message'].get('text')
+								# if text_message_callback != 'Type your address' and not re.search('BMI',text_message_callback):
 								'''
-								if not echo and latest db record =[address=1 , jpg=0] ; only then write this
+								read content of db here 
 								'''
-								print(messaging_event.get('message').values())
-								hospital=get_address(messaging_event['message'].get('text'))
-								send_message(recipient_id,hospital)
+								#db=eval(open('db.txt','r').read())
+								### echo is when the flask app sends a message
+								if not 'is_echo' in messaging_event.get('message').keys() and db.get('address'):
+									'''
+									if not echo and latest db record =[address=1 , jpg=0] ; only then write this
+									'''
+									print(messaging_event.get('message').values())
+									hospital=get_address(messaging_event['message'].get('text'))
+									send_message(recipient_id,hospital)
+									'''
+									Reset the records of the database [address=0,jpg=0] and write it back ; conversation completed
+
+									'''
+									db={'address':0,'jpg':0}
+									with open('db.txt','w') as file:
+										file.write(json.dumps(db))
+								else:
+									send_message( recipient_id,'Hi, This bot currently allows hospital locator and BMI recognition')
+
+							# else:
+								# send_message(recipient_id,'howdy mate!')
+			
+							if messaging_event['message'].get('attachments') and db.get('jpg'):
+								print('bmi')
 								'''
-								Reset the records of the database [address=0,jpg=0] and write it back ; conversation completed
+								if latest db record=[address=0, jpg=1]
+								'''
+
+								file_name=messaging_event['message'].get('attachments')[0]['payload']['url']
+								#os.makedirs(os.path.dirname(pic_folder_path+'/'+file_name), exist_ok=True)
+								file_download_name=wget.download(file_name)
+								#os.rename(file_name,pic_folder_path)
+								#response=give_ans(file_download_name)
+								print("exe	cuted bmi")
+								#send_message(recipient_id, response)
+								send_message(recipient_id,"executed bmi")
+								'''
+									Reset the records of the database [address=0,jpg=0] and write it back ; conversation completed
 
 								'''
 								db={'address':0,'jpg':0}
 								with open('db.txt','w') as file:
 									file.write(json.dumps(db))
-							else:
-								send_message( recipient_id,'Hi, This bot currently allows hospital locator and BMI recognition')
-
-						# else:
-							# send_message(recipient_id,'howdy mate!')
-		
-						if messaging_event['message'].get('attachments') and db.get('bmi'):
-							print('bmi')
-							'''
-							if latest db record=[address=0, jpg=1]
-							'''
-
-							file_name=messaging_event['message'].get('attachments')[0]['payload']['url']
-							file_download_name=wget.download(file_name)
-							response=give_ans(file_download_name)
-							# print(response)
-							send_message(recipient_id, response)
-							'''
-								Reset the records of the database [address=0,jpg=0] and write it back ; conversation completed
-
-							'''
-							db={'address':0,'jpg':0}
-							with open('db.txt','w') as file:
-								file.write(json.dumps(db))
 
 
 	return "Message Processed"
@@ -147,6 +159,13 @@ def get_address(address):
 	fp = urllib.request.urlopen(new_address)
 	json_address= fp.read()
 	return (eval(json_address)['name']['0'])
+
+def verify_fb_token(token_sent):
+    #take token sent by facebook and verify it matches the verify token you sent
+    #if they match, allow the request, else return an error 
+    if token_sent == VERIFY_TOKEN:
+        return request.args.get("hub.challenge")
+    return 'Invalid verification token'
 	
 
 if __name__ == "__main__":
