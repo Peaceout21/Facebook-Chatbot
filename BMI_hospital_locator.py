@@ -7,7 +7,7 @@ import urllib.request
 site='http://flask-env.iir8am5aem.ap-southeast-1.elasticbeanstalk.com/'
 
 app = Flask(__name__)
-c_ACCESS_TOKEN='EAADrWWKPR2EBAO5xfx5ayTNKULqWoRe4fEA67UxRGB0H5GqeVseyyXegcARRzxRpGWbc9d2B0aPMtOPGB0cQCkD9SVZAxBo027vOFpNck5w2TrslWqjcBVUH2LiWb6hsVpd1fw8pDR5FCu4maYPczbWTnCSrERR2eqNM4Wm8kvFGXZChND'
+c_ACCESS_TOKEN='EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0o6pv'
 
 VERIFY_TOKEN = 'VERIFY_TOKEN'
 bot = Bot(c_ACCESS_TOKEN)
@@ -115,8 +115,8 @@ def webook():
 
 							'''
 							db={'address':0,'jpg':0}
-								with open('db.txt','w') as file:
-									file.write(json.dumps(db))
+							with open('db.txt','w') as file:
+								file.write(json.dumps(db))
 
 
 	return "Message Processed"
