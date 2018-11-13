@@ -1,8 +1,9 @@
 from flask import Flask, request
-import random,requests,wget,json,os
+import random,requests,wget,json,os,csv
 from pymessenger.bot import Bot
 import urllib.request
-
+import numpy as np
+from haversine import haversine
 
 site='http://flask-env.iir8am5aem.ap-southeast-1.elasticbeanstalk.com/'
 
@@ -15,7 +16,9 @@ bot = Bot(c_ACCESS_TOKEN)
 pic_folder_path=os.getcwd()+'/pics'
 
 
-
+reader = csv.reader(open("Hospitals_geotagged.csv",encoding='ISO-8859-1'))
+coord_index={}
+hosp_index={}
 
 params = (
     ('access_token', c_ACCESS_TOKEN),
@@ -150,10 +153,15 @@ def webook():
 
 							if messaging_event['message'].get('attachments'):
 								if messaging_event['message'].get('attachments')[0].get('type')=='location':
-									print('locate')
-									x=str((messaging_event['message'].get('attachments')[0].get('payload').get('coordinates').values()))
+									coords=messaging_event['message'].get('attachments')[0].get('payload').get('coordinates')
+									query_location=coords.get('lat'),coords.get('long')	
+									nearest_hospital=get_hosp(query_location)
+									print(nearest_hospital)
+									send_message(recipient_id,"Your nearest hospital is "+ nearest_hospital )
 
-									send_message(recipient_id,"Your location is "+ '  ' + x)
+
+
+
 
 
 
@@ -193,6 +201,19 @@ def verify_fb_token(token_sent):
         return request.args.get("hub.challenge")
     return 'Invalid verification token'
 	
+
+def get_hosp(query_location):
+	for row_num ,row in enumerate(reader):
+	    if row_num>0:
+	        index,lat,lon,hosp_name=int(row[0]),row[1],row[2],row[3]
+	        coord_index[(float(lat),float(lon))]=index
+	        hosp_index[index]=hosp_name
+
+	distance=np.array([haversine(query_location,coords) for coords in coord_index.keys()])
+
+	return hosp_index.get(distance.argmin())
+
+
 
 if __name__ == "__main__":
     app.run()
