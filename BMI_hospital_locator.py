@@ -14,6 +14,17 @@ bot = Bot(c_ACCESS_TOKEN)
 
 pic_folder_path=os.getcwd()+'/pics'
 
+
+
+
+params = (
+    ('access_token', c_ACCESS_TOKEN),
+)
+
+#data = '{\n  "recipient":{\n    "id":"121"\n  },\n"message":{\n"text": "Here is a quick reply!",\n "quick_replies":[\n {\n "content_type":"text",\n "title":"Test",\n"payload":"test load",\n      }\n    ]\n  }\n}'
+
+#response = requests.post('https://graph.facebook.com/v2.6/me/messages?access_token=EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0o6pv', headers=headers, data=data)
+
 db={'address':0,'jpg':0}
 with open('db.txt','w') as file:
 	file.write(json.dumps(db))
@@ -39,7 +50,7 @@ def webook():
 				for messaging_event in entry["messaging"]:
 					print(messaging_event)
 					if messaging_event.get("postback"):
-						print("Post back event activated")
+						#print("Post back event activated")
 						
 			# user clicked/tapped "postback" button in earlier message
 			 
@@ -49,16 +60,23 @@ def webook():
 						# log("Inside postback")
 						print(message_text)
 						sender_id = messaging_event["sender"]["id"]
-						 
+						recipient_id=messaging_event["recipient"]["id"]
+						print(sender_id,recipient_id)
 						if (message_text == "Address"):
-							'''
-							update the data structure ; write to a db ( address =1, jpg=0)
-							'''
-							db={'address':1,'jpg':0}
-							with open('db.txt','w') as file:
-								file.write(json.dumps(db))
 
-							send_message(sender_id, "Type your address")
+							#send_message(sender_id, "Type your address")
+
+							print(sender_id)
+							headers = {'Content-Type': 'application/json',}
+							#data = '{\n  "recipient":{\n    "id":"2029039910496885"\n  },\n"message":{\n"text": "Please click on the button!",\n "quick_replies":[\n {\n "content_type":"location",\n "title":"Test",\n"payload":"test load",\n}\n]\n  }\n}'
+							data = {"recipient":
+		{"id":sender_id},"message":
+		{"text": "Please click on the button!","quick_replies":
+		[{"content_type":"location"}]
+		}
+		}
+							response = requests.post('https://graph.facebook.com/v2.6/me/messages?access_token=EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0o6pv', headers=headers, data=json.dumps(data))
+							print(sender_id)
 						if (message_text=="bmi"):
 
 							'''
@@ -118,10 +136,10 @@ def webook():
 								#os.makedirs(os.path.dirname(pic_folder_path+'/'+file_name), exist_ok=True)
 								file_download_name=wget.download(file_name)
 								#os.rename(file_name,pic_folder_path)
-								#response=give_ans(file_download_name)
+								response=give_ans(file_download_name)
 								print("exe	cuted bmi")
-								#send_message(recipient_id, response)
-								send_message(recipient_id,"executed bmi")
+								send_message(recipient_id, response)
+								#send_message(recipient_id,"executed bmi")
 								'''
 									Reset the records of the database [address=0,jpg=0] and write it back ; conversation completed
 
@@ -130,6 +148,14 @@ def webook():
 								with open('db.txt','w') as file:
 									file.write(json.dumps(db))
 
+							if messaging_event['message'].get('attachments'):
+								if messaging_event['message'].get('attachments')[0].get('type')=='location':
+									print('locate')
+									x=str((messaging_event['message'].get('attachments')[0].get('payload').get('coordinates').values()))
+
+									send_message(recipient_id,"Your location is "+ '  ' + x)
+
+
 
 	return "Message Processed"
 
@@ -137,7 +163,7 @@ def webook():
 
 def give_ans(file_name):
   f={'image_data':open(file_name,'rb')}
-  r=requests.post('http://13.67.65.44:8000/images',files=f,data={'image_ext':'jpg','id':'1234'})
+  r=requests.post('http://23.101.26.128:8000/images',files=f,data={'image_ext':'jpg','id':'1234'})
   answer=r.json()
   if answer['Status']=='Failed':
      return 'BMI detector in development!'
