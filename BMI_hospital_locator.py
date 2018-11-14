@@ -1,8 +1,8 @@
 from flask import Flask, request
-import random,requests,wget,json,os,csv
+import random,requests,wget,json,os
 from pymessenger.bot import Bot
 import urllib.request
-import numpy as np
+import pandas as pd
 from haversine import haversine
 
 site='http://flask-env.iir8am5aem.ap-southeast-1.elasticbeanstalk.com/'
@@ -13,12 +13,14 @@ c_ACCESS_TOKEN='EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTV
 VERIFY_TOKEN = 'VERIFY_TOKEN'
 bot = Bot(c_ACCESS_TOKEN)
 
-pic_folder_path=os.getcwd()+'/pics'
 
 
-reader = csv.reader(open("Hospitals_geotagged.csv",encoding='ISO-8859-1'))
-coord_index={}
-hosp_index={}
+df=pd.read_csv('Hospitals_geotagged.csv',encoding='ISO-8859-1')
+df['result']=df.apply(lambda x: (x['lat'],x['lon']),axis=1)
+
+
+
+
 
 params = (
     ('access_token', c_ACCESS_TOKEN),
@@ -65,6 +67,10 @@ def webook():
 						sender_id = messaging_event["sender"]["id"]
 						recipient_id=messaging_event["recipient"]["id"]
 						print(sender_id,recipient_id)
+						if message_text=='FACEBOOK_WELCOME':
+							send_message(sender_id,"Hello there! I am a bot and I was built to estimate your BMI and find the nearest hospital")
+
+
 						if (message_text == "Address"):
 
 							#send_message(sender_id, "Type your address")
@@ -135,29 +141,37 @@ def webook():
 								if latest db record=[address=0, jpg=1]
 								'''
 
-								file_name=messaging_event['message'].get('attachments')[0]['payload']['url']
-								#os.makedirs(os.path.dirname(pic_folder_path+'/'+file_name), exist_ok=True)
-								file_download_name=wget.download(file_name)
-								#os.rename(file_name,pic_folder_path)
-								response=give_ans(file_download_name)
-								print("exe	cuted bmi")
-								send_message(recipient_id, response)
-								#send_message(recipient_id,"executed bmi")
-								'''
-									Reset the records of the database [address=0,jpg=0] and write it back ; conversation completed
-
-								'''
 								db={'address':0,'jpg':0}
 								with open('db.txt','w') as file:
 									file.write(json.dumps(db))
+								if messaging_event['message'].get('attachments')[0].get('type')=='image':		
+									file_name=messaging_event['message'].get('attachments')[0]['payload']['url']
+								#os.makedirs(os.path.dirname(pic_folder_path+'/'+file_name), exist_ok=True)
+									file_download_name=wget.download(file_name)
+								#os.rename(file_name,pic_folder_path)
+									response=give_ans(file_download_name)
+									print("exe	cuted bmi")
+									send_message(recipient_id, response)
+								#send_message(recipient_id,"executed bmi")
+								'''
+									Reset the records of the database [address=0,jpg=0] and write it back ; conversation completed
+								'''	
+
 
 							if messaging_event['message'].get('attachments'):
 								if messaging_event['message'].get('attachments')[0].get('type')=='location':
+									
+
+									db={'address':0,'jpg':0}
+									with open('db.txt','w') as file:
+										file.write(json.dumps(db))
+
 									coords=messaging_event['message'].get('attachments')[0].get('payload').get('coordinates')
-									query_location=coords.get('lat'),coords.get('long')	
+									query_location=(coords.get('lat'),coords.get('long'))	
 									nearest_hospital=get_hosp(query_location)
 									print(nearest_hospital)
-									send_message(recipient_id,"Your nearest hospital is "+ nearest_hospital )
+									send_message(recipient_id,nearest_hospital )
+
 
 
 
@@ -203,15 +217,11 @@ def verify_fb_token(token_sent):
 	
 
 def get_hosp(query_location):
-	for row_num ,row in enumerate(reader):
-	    if row_num>0:
-	        index,lat,lon,hosp_name=int(row[0]),row[1],row[2],row[3]
-	        coord_index[(float(lat),float(lon))]=index
-	        hosp_index[index]=hosp_name
-
-	distance=np.array([haversine(query_location,coords) for coords in coord_index.keys()])
-
-	return hosp_index.get(distance.argmin())
+	df['query']=df.apply(lambda x: query_location,axis=1)
+	df['distance']=df.apply(lambda x: haversine(x['result'],x['query']),axis=1)
+	df.sort_values('distance',inplace=True)
+	sorted_list=list(df.head(2)['name'])
+	return 'Your nearest hospitals are '+  ' and '.join(sorted_list)
 
 
 
