@@ -130,7 +130,18 @@ def webook():
 									with open('db.txt','w') as file:
 										file.write(json.dumps(db))
 								else:
-									send_message( recipient_id,'Hi, This bot currently allows hospital locator and BMI recognition')
+									buttons=[{
+									"type":"postback",
+									"title":"answer question",
+									"payload":"ok"
+									},
+									{"type":"postback",
+									"title":"exit diag app",
+									"payload":"not ok"
+									}
+									]
+									bot.send_button_message(recipient_id,"Some question asked from the diag api", buttons)
+									# send_message( recipient_id,'Hi, This bot currently allows hospital locator and BMI recognition')
 
 							# else:
 								# send_message(recipient_id,'howdy mate!')
