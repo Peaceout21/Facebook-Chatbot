@@ -97,6 +97,12 @@ def webook():
 
 							send_message(sender_id, "Please upload your selfie")
 
+						if (message_text=='ok'):
+							send_message(sender_id, "Next question asked by api")
+
+						if (message_text=='not ok'):
+							send_message(sender_id, "bye!")							
+
 					else:
 						# print('this is where you write the condition')
 						# print(messaging_event)
@@ -129,7 +135,9 @@ def webook():
 									db={'address':0,'jpg':0}
 									with open('db.txt','w') as file:
 										file.write(json.dumps(db))
+															# if not 'is_echo' in messaging_event.get('message').keys() and :
 								else:
+
 									buttons=[{
 									"type":"postback",
 									"title":"answer question",
@@ -140,7 +148,23 @@ def webook():
 									"payload":"not ok"
 									}
 									]
-									bot.send_button_message(recipient_id,"Some question asked from the diag api", buttons)
+									# bot.send_button_message(recipient_id,"Some question asked from the diag api", buttons)
+									data = {"recipient":
+									{"id":recipient_id},"message":
+									{"text": "The answer from diag api do you want to continue?","quick_replies":
+									[{"content_type":"text",
+										"title":"yes",
+										"payload":"ok"},
+										{
+										"content_type":"text",
+										"title":"no",
+										"payload":"not ok"
+										}]
+									}
+									}
+									headers = {'Content-Type': 'application/json',}
+									response = requests.post('https://graph.facebook.com/v2.6/me/messages?access_token=EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0o6pv', headers=headers, data=json.dumps(data))
+
 									# send_message( recipient_id,'Hi, This bot currently allows hospital locator and BMI recognition')
 
 							# else:
@@ -161,7 +185,7 @@ def webook():
 									file_download_name=wget.download(file_name)
 								#os.rename(file_name,pic_folder_path)
 									response=give_ans(file_download_name)
-									print("exe	cuted bmi")
+									print("executed bmi")
 									send_message(recipient_id, response)
 								#send_message(recipient_id,"executed bmi")
 								'''
@@ -196,7 +220,7 @@ def webook():
 
 def give_ans(file_name):
   f={'image_data':open(file_name,'rb')}
-  r=requests.post('http://23.101.26.128:8000/images',files=f,data={'image_ext':'jpg','id':'1234'})
+  r=requests.post('http://13.67.65.44:8000/images',files=f,data={'image_ext':'jpg','id':'1234'})
   answer=r.json()
   if answer['Status']=='Failed':
      return 'BMI detector in development!'
