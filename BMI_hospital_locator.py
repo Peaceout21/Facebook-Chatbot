@@ -1,59 +1,56 @@
 from flask import Flask, request
-import random,requests,wget,json,os
+import requests,wget,json,os
 from pymessenger.bot import Bot
 import urllib.request
 import pandas as pd
 from haversine import haversine
 
-site='http://flask-env.iir8am5aem.ap-southeast-1.elasticbeanstalk.com/'
+# site='http://flask-env.iir8am5aem.ap-southeast-1.elasticbeanstalk.com/'
 
 app = Flask(__name__)
-#c_ACCESS_TOKEN='EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0opv'
+# c_ACCESS_TOKEN='EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0opv'
 c_ACCESS_TOKEN='EAADrWWKPR2EBAJcorxLoOdI8lldETu3EXY54hrOZAzMRNFHvORM9B3tTHC1zIa4gZBTYmJnuw1hd34BZCeRiBPRFag3eEx5dUEhMmROjLqzQ24xt1ZCl2aItZCEyeGvrxjMVgRR2ikWTDFYNBWgNxNPmXzZClWkcqDYcJYuNqHBZBrlgApy7tJU'
 VERIFY_TOKEN = 'VERIFY_TOKEN'
 bot = Bot(c_ACCESS_TOKEN)
 
 
 
-df=pd.read_csv('Hospitals_geotagged.csv',encoding='ISO-8859-1')
-df['result']=df.apply(lambda x: (x['lat'],x['lon']),axis=1)
-
-
-
-#data = '{\n  "recipient":{\n    "id":"121"\n  },\n"message":{\n"text": "Here is a quick reply!",\n "quick_replies":[\n {\n "content_type":"text",\n "title":"Test",\n"payload":"test load",\n      }\n    ]\n  }\n}'
-
-#response = requests.post('https://graph.facebook.com/v2.6/me/messages?access_token=EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0o6pv', headers=headers, data=data)
-
+hospital_data=pd.read_csv('Hospitals_geotagged.csv',encoding='ISO-8859-1')
+hospital_data['result']=hospital_data.apply(lambda x: (x['lat'],x['lon']),axis=1)
 
 def DBrw(address,image):
 	db={'address':address,'image':image}
 	with open('db.txt','w') as file:
 		file.write(json.dumps(db))	
 
-def give_ans(file_name):
+
+def give_ans_bmi(file_name):
   f={'image_data':open(file_name,'rb')}
   r=requests.post('http://13.67.65.44:8000/images',files=f,data={'image_ext':'jpg','id':'1234'})
   answer=r.json()
-  if answer['Status']=='Failed':
-     return 'BMI detector in development!'
-  else:
-     return "Your BMI is " + answer['BMI']+"  Your Age is in the range of " +answer['Age'] + "  And we detected you as a " + answer['Gender']
-  
+  try:
+  	if answer['Status']=='Failed':
+  		return 'BMI detector in development!'
+  	else:
+  		return "Your BMI is " + answer['BMI']+"  Your Age is in the range of " +answer['Age'] + "  And we detected you as a " + answer['Gender']
+  except:
+  	return "404 error"
+
+
 def quickreply(id,text,qr_payload):
-	params = (
-	    ('access_token', c_ACCESS_TOKEN),
-	)
-	data = {"recipient":
-		   {"id":id},"message":{"text": text,"quick_replies":qr_payload }
-		   }
+	params = (('access_token', c_ACCESS_TOKEN),)
+	data = {"recipient":{"id":id},
+			"message":{"text": text,"quick_replies":qr_payload }}
 	headers = {'Content-Type': 'application/json',}
 	requests.post('https://graph.facebook.com/v2.6/me/messages?access_token=EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0o6pv', headers=headers, data=json.dumps(data))
+
 
 #uses PyMessenger to send response to user
 def send_message(recipient_id, response):
     #sends user the text message provided via input response parameter
     bot.send_text_message(recipient_id, response)
     return "success"
+
 
 def verify_fb_token(token_sent):
     #take token sent by facebook and verify it matches the verify token you sent
@@ -64,15 +61,14 @@ def verify_fb_token(token_sent):
 	
 
 def get_hosp(query_location):
-	df['query']=df.apply(lambda x: query_location,axis=1)
-	df['distance']=df.apply(lambda x: haversine(x['result'],x['query']),axis=1)
-	df.sort_values('distance',inplace=True)
-	sorted_list=list(df.head(2)['name'])
+	hospital_data['query']=hospital_data.apply(lambda x: query_location,axis=1)
+	hospital_data['distance']=hospital_data.apply(lambda x: haversine(x['result'],x['query']),axis=1)
+	hospital_data.sort_values('distance',inplace=True)
+	sorted_list=list(hospital_data.head(2)['name'])
 	return 'Your nearest hospitals are '+  ' and '.join(sorted_list)
 
 ### Initialise the db at 0
 DBrw(address=0,image=0)
-
 
 #We will receive messages that Facebook sends our bot at this endpoint 
 @app.route("/", methods=['GET', 'POST'])
@@ -191,7 +187,7 @@ def webook():
 								#os.makedirs(os.path.dirname(pic_folder_path+'/'+file_name), exist_ok=True)
 									file_download_name=wget.download(file_name)
 								#os.rename(file_name,pic_folder_path)
-									response=give_ans(file_download_name)
+									response=give_ans_bmi(file_download_name)
 									print("executed bmi")
 									send_message(recipient_id, response)
 								#send_message(recipient_id,"executed bmi")
