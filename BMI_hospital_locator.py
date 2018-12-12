@@ -9,7 +9,7 @@ from haversine import haversine
 
 app = Flask(__name__)
 # c_ACCESS_TOKEN='EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0opv'
-c_ACCESS_TOKEN='EAADrWWKPR2EBAJcorxLoOdI8lldETu3EXY54hrOZAzMRNFHvORM9B3tTHC1zIa4gZBTYmJnuw1hd34BZCeRiBPRFag3eEx5dUEhMmROjLqzQ24xt1ZCl2aItZCEyeGvrxjMVgRR2ikWTDFYNBWgNxNPmXzZClWkcqDYcJYuNqHBZBrlgApy7tJU'
+c_ACCESS_TOKEN='EAADrWWKPR2EBAIpksn9aB5UYyPksjq1bjFJ3h1gd6dR4gmqTLiZAWpApuZC1SzLWmmdn6HMzFrcHQmjY1ZAIJeFSeXlWn0BSlCZBNp1xUfLLF3ZCn5erSzKGEvSydVdGxm2G454Bme0NTqF0nM93En1AAhco4hBV8cxdL3ZBwqU64O7lXBKPoe'
 VERIFY_TOKEN = 'VERIFY_TOKEN'
 bot = Bot(c_ACCESS_TOKEN)
 
@@ -103,8 +103,14 @@ def webook():
 						recipient_id=messaging_event["recipient"]["id"]
 						print(sender_id,recipient_id)
 						if message_text=='FACEBOOK_WELCOME':
-							send_message(sender_id,"Hello there! I am a bot and I was built to estimate your BMI and find the nearest hospital")
-
+							buttons=[{"type":"postback","title":"BMI Indicator","payload":"bmi"},
+									{"type":"postback",	"title":"Get nearest hospital","payload":"Address"},
+									{"type":"web_url","title":"Diagnostics ","url":"https://chatdemosz.azurewebsites.net/chat.html",
+	 									"messenger_extensions":True,
+	 								"webview_height_ratio":"compact"}
+									]
+							message="Hello there! I am a bot and I was built to estimate your BMI, find your nearest hospital and diagnose your health"		
+							bot.send_button_message(sender_id,message,buttons)
 
 						if message_text=='menu':
 							buttons=[{"type":"postback","title":"BMI Indicator","payload":"bmi"},
@@ -123,11 +129,11 @@ def webook():
 
 							send_message(sender_id, "Please upload your selfie")
 
-						if (message_text=='ok'):
-							send_message(sender_id, "Next question asked by api")
+						# if (message_text=='ok'):
+						# 	send_message(sender_id, "Next question asked by api")
 
-						if (message_text=='not ok'):
-							send_message(sender_id, "bye!")							
+						# if (message_text=='not ok'):
+						# 	send_message(sender_id, "bye!")							
 
 					else:
 						# print('this is where you write the condition')
