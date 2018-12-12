@@ -107,16 +107,19 @@ def webook():
 									{"type":"postback",	"title":"Get nearest hospital","payload":"Address"},
 									{"type":"web_url","title":"Diagnostics ","url":"https://chatdemosz.azurewebsites.net/chat.html",
 	 									"messenger_extensions":True,
-	 								"webview_height_ratio":"compact"}
+	 								"webview_height_ratio":"tall"}
 									]
 							message="Hello there! I am a bot and I was built to estimate your BMI, find your nearest hospital and diagnose your health"		
 							bot.send_button_message(sender_id,message,buttons)
 
 						if message_text=='menu':
 							buttons=[{"type":"postback","title":"BMI Indicator","payload":"bmi"},
-									{"type":"postback",	"title":"Get nearest hospital","payload":"Address"}
+									{"type":"postback",	"title":"Get nearest hospital","payload":"Address"},
+									{"type":"web_url","title":"Diagnostics ","url":"https://chatdemosz.azurewebsites.net/chat.html",
+	 									"messenger_extensions":True,
+	 								"webview_height_ratio":"tall"}
 									]
-							message="Hi! We currently provide you these two services \nPlease select one to continue"		
+							message="Hi! We currently under debvelopment \nTill then please select one of the below"		
 							bot.send_button_message(sender_id,message,buttons)
 
 						if (message_text == "Address"):
@@ -154,10 +157,18 @@ def webook():
 								#db=eval(open('db.txt','r').read())
 								### echo is when the flask app sends a message
 								print(text_message_callback)
-								# if not 'is_echo' in messaging_event.get('message').keys():
+								if not 'is_echo' in messaging_event.get('message').keys():
 									# print(messaging_event.get('message').keys())
 									# send_message( recipient_id,'Hi, This bot currently allows hospital locator and BMI recognition')
-
+									buttons=[{"type":"postback","title":"BMI Indicator","payload":"bmi"},
+									{"type":"postback",	"title":"Get nearest hospital","payload":"Address"},
+									{"type":"web_url","title":"Diagnostics ","url":"https://chatdemosz.azurewebsites.net/chat.html",
+	 									"messenger_extensions":True,
+	 								"webview_height_ratio":"tall"}
+									]
+									message="Hi! We currently under debvelopment \nTill then please select one of the below"		
+									bot.send_button_message(recipient_id,message,buttons)
+	
 									
 								# else:
 
