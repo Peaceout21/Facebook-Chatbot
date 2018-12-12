@@ -26,13 +26,13 @@ def DBrw(address,image):
 
 def give_ans_bmi(file_name):
   f={'image_data':open(file_name,'rb')}
-  r=requests.post('http://13.67.65.44:8000/images',files=f,data={'image_ext':'jpg','id':'1234'})
+  r=requests.post('http://23.101.26.128:8000/images',files=f,data={'image_ext':'jpg','id':'1234'})
   answer=r.json()
   try:
-  	if answer['Status']=='Failed':
+  	if answer['status']=='Failed':
   		return 'BMI detector in development!'
   	else:
-  		return "Your BMI is " + answer['BMI']+"  Your Age is in the range of " +answer['Age'] + "  And we detected you as a " + answer['Gender']
+  		return "Your BMI is " + answer['bmi']+"  Your Age is in the range of " +answer['age'] + "  And we detected you as a " + answer['gender']
   except:
   	return "404 error"
 
@@ -154,9 +154,9 @@ def webook():
 								#db=eval(open('db.txt','r').read())
 								### echo is when the flask app sends a message
 								print(text_message_callback)
-								if not 'is_echo' in messaging_event.get('message').keys():
-									print(messaging_event.get('message').keys())
-									send_message( recipient_id,'Hi, This bot currently allows hospital locator and BMI recognition')
+								# if not 'is_echo' in messaging_event.get('message').keys():
+									# print(messaging_event.get('message').keys())
+									# send_message( recipient_id,'Hi, This bot currently allows hospital locator and BMI recognition')
 
 									
 								# else:
