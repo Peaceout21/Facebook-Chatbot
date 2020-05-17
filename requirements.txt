@@ -1,11 +1,8 @@
 Flask==0.12
-fuzzywuzzy==0.16.0
 haversine
-nltk==3.2.2
 numpy==1.14.5
 pandas==0.19.2
 pymessenger==0.0.7.0
 requests==2.19.1
 urllib3==1.23
 wget==3.2
-xlrd==1.0.0
