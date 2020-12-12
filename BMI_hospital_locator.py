@@ -6,12 +6,13 @@ import pandas as pd
 from haversine import haversine
 
 # site='http://flask-env.iir8am5aem.ap-southeast-1.elasticbeanstalk.com/'
+# 'EAADrWWKPR2EBABUzqVZBrjCC5YBCQ62eGSrn7jSN6IzG6oEhaslEgZCAgTZCpZCRv483dBwqAIVDMx8ghoXR4eXo9Oahp4VJMrd3U18eCcxRZBQ3tGrft6p5D5l9xhCEVtzG8uriGi4047KbfCZAZA2FQx5H1vDZByuHd10gZCmZAqAVS3gVIgPAvy'
 
 app = Flask(__name__)
-# c_ACCESS_TOKEN='EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0opv'
-# c_ACCESS_TOKEN='EAADrWWKPR2EBAIpksn9aB5UYyPksjq1bjFJ3h1gd6dR4gmqTLiZAWpApuZC1SzLWmmdn6HMzFrcHQmjY1ZAIJeFSeXlWn0BSlCZBNp1xUfLLF3ZCn5erSzKGEvSydVdGxm2G454Bme0NTqF0nM93En1AAhco4hBV8cxdL3ZBwqU64O7lXBKPoe'
-c_ACCESS_TOKEN = 'EAADrWWKPR2EBABUzqVZBrjCC5YBCQ62eGSrn7jSN6IzG6oEhaslEgZCAgTZCpZCRv483dBwqAIVDMx8ghoXR4eXo9Oahp4VJMrd3U18eCcxRZBQ3tGrft6p5D5l9xhCEVtzG8uriGi4047KbfCZAZA2FQx5H1vDZByuHd10gZCmZAqAVS3gVIgPAvy'
-VERIFY_TOKEN = 'VERIFY_TOKEN'
+
+c_ACCESS_TOKEN = os.getenv('access_token')
+
+VERIFY_TOKEN = os.getenv('VERIFY_TOKEN','VERIFY_TOKEN')
 bot = Bot(c_ACCESS_TOKEN)
 
 hospital_data = pd.read_csv('Hospitals_geotagged.csv', encoding='ISO-8859-1')
