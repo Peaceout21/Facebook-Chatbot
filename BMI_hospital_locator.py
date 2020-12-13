@@ -6,14 +6,15 @@ import pandas as pd
 from haversine import haversine
 
 # site='http://flask-env.iir8am5aem.ap-southeast-1.elasticbeanstalk.com/'
-# 'EAADrWWKPR2EBABUzqVZBrjCC5YBCQ62eGSrn7jSN6IzG6oEhaslEgZCAgTZCpZCRv483dBwqAIVDMx8ghoXR4eXo9Oahp4VJMrd3U18eCcxRZBQ3tGrft6p5D5l9xhCEVtzG8uriGi4047KbfCZAZA2FQx5H1vDZByuHd10gZCmZAqAVS3gVIgPAvy'
+
 
 app = Flask(__name__)
 
 c_ACCESS_TOKEN = os.getenv('access_token')
-
 VERIFY_TOKEN = os.getenv('VERIFY_TOKEN','VERIFY_TOKEN')
 bot = Bot(c_ACCESS_TOKEN)
+''' fb graph token '''
+fb_token = os.getenv('fb_token')
 
 hospital_data = pd.read_csv('Hospitals_geotagged.csv', encoding='ISO-8859-1')
 hospital_data['result'] = hospital_data.apply(lambda x: (x['lat'], x['lon']), axis=1)
@@ -46,7 +47,7 @@ def quickreply(id, text, qr_payload):
             "message": {"text": text, "quick_replies": qr_payload}}
     headers = {'Content-Type': 'application/json', }
     requests.post(
-        'https://graph.facebook.com/v2.6/me/messages?access_token=EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0o6pv',
+        f'https://graph.facebook.com/v2.6/me/messages?access_token={fb_token}',
         headers=headers, data=json.dumps(data))
 
 
@@ -201,7 +202,7 @@ def webook():
                         # 	}
                         # 	}
                         # 	headers = {'Content-Type': 'application/json',}
-                        # 	response = requests.post('https://graph.facebook.com/v2.6/me/messages?access_token=EAADrWWKPR2EBAG8rdlU9ZA5MteZA2ZCtobvV44YJPT3B1522EmjqK53XufVCFTVa8VIU8qnMiU8g7da1RZALEaalQVv4uSaPTxswKSSLnoZCLMYRR7zy6bbu9V0lvXnEVGb8VNOL4CnZASzhaZCqtF4FuC6xcDToPOtTgAkyLNGjYjf16G0o6pv', headers=headers, data=json.dumps(data))
+                        # 	response = requests.post(f'https://graph.facebook.com/v2.6/me/messages?access_token={fb_token}', headers=headers, data=json.dumps(data))
 
                         # send_message( recipient_id,'Hi, This bot currently allows hospital locator and BMI recognition')
 
