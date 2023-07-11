@@ -1,6 +1,6 @@
 Flask==1.0
 haversine
-numpy==1.14.5
+numpy==1.22.0
 pandas==0.19.2
 pymessenger==0.0.7.0
 requests==2.20.0
