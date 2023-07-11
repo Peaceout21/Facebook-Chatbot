@@ -3,6 +3,6 @@ haversine
 numpy==1.22.0
 pandas==0.19.2
 pymessenger==0.0.7.0
-requests==2.20.0
+requests==2.31.0
 urllib3==1.26.5
 wget==3.2
