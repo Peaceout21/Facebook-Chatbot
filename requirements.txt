@@ -1,4 +1,4 @@
-Flask==1.0
+Flask==2.2.5
 haversine
 numpy==1.22.0
 pandas==0.19.2
